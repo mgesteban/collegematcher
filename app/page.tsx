@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { StudentProfile, MatchResult } from "@/types"
-import { mockColleges } from "@/data/mock-colleges"
+import { californiaColleges } from "@/data/california-colleges"
 import { CollegeMatchingService } from "@/lib/matching-service"
 import { geocodeAddress } from "@/lib/geocoding-service"
 import StudentAssessment from "@/components/student-assessment"
@@ -40,8 +40,8 @@ export default function Home() {
 
       setStudentProfile(profile)
 
-      // Initialize matching service with mock data
-      const matchingService = new CollegeMatchingService(mockColleges)
+      // Initialize matching service with California colleges data
+      const matchingService = new CollegeMatchingService(californiaColleges)
 
       // Find matches
       const results = await matchingService.findMatches(profile)
