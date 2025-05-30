@@ -1,19 +1,28 @@
-import CollegeList from "@/components/college-list"
+import CollegeList from "@/components/college-list" // Corrected import path
 import { loadCollegesFromCSV } from "@/data/load-colleges"
 
 export default async function Home() {
   const allColleges = await loadCollegesFromCSV()
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-100 lg:p-4 lg:dark:bg-zinc-800/30">
-          California Colleges
-        </p>
-      </div>
+    <main className="flex min-h-screen flex-col items-center p-4 md:p-8 lg:p-12 bg-gray-50">
+      <div className="w-full max-w-4xl">
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-800 sm:text-4xl">California Community Colleges</h1>
+          <p className="mt-2 text-lg text-gray-600">
+            Browse the list of community colleges loaded from our data source.
+          </p>
+        </header>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-1 lg:text-left">
-        <CollegeList colleges={allColleges} />
+        <section>
+          {allColleges && allColleges.length > 0 ? (
+            <CollegeList colleges={allColleges} />
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-xl text-gray-700">Loading college data or no colleges found.</p>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   )
