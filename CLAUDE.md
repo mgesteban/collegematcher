@@ -2,56 +2,64 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Project Overview
 
-- **Development**: `pnpm dev` or `npm run dev` - Start Next.js development server
-- **Build**: `pnpm build` or `npm run build` - Build for production
-- **Start**: `pnpm start` or `npm run start` - Start production server
-- **Lint**: `pnpm lint` or `npm run lint` - Run Next.js linting
+Community College Matcher - An AI-powered Next.js application that helps students find suitable community colleges based on their preferences, academic goals, and personal circumstances.
+
+## Development Commands
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+
+# Run linter
+pnpm lint
+```
 
 ## Architecture
 
-This is a Next.js 15 application for a Community College Matching Agent that helps students find suitable community colleges based on their preferences, academic interests, and personal circumstances.
+### Tech Stack
+- **Framework**: Next.js 15.2.4 with App Router
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Styling**: Tailwind CSS
+- **Forms**: react-hook-form with zod validation
+- **AI Integration**: OpenAI SDK with Vercel AI SDK
+- **Maps**: react-leaflet for college location visualization
 
-### Core Components
+### Key Components
 
-**Main Application Flow**:
-- `/app/page.tsx` - Root page with tab-based interface containing student assessment, match results, map view, financial calculator, application tracker, and AI counselor
-- `/components/student-assessment.tsx` - Multi-step form for collecting student profile data
-- `/lib/matching-service.ts` - Core matching algorithm that scores colleges based on student profile
+**Feature Components** (`/components/`):
+- `student-assessment.tsx` - Multi-step questionnaire to collect student preferences
+- `match-results.tsx` - Displays AI-matched colleges with scores
+- `chat-interface.tsx` - AI counselor chatbot using OpenAI
+- `college-map.tsx` - Interactive map showing college locations
+- `financial-calculator.tsx` - Cost estimation and financial aid calculator
+- `application-tracker.tsx` - Tracks application status for multiple colleges
 
-**Data Models** (`/types/index.ts`):
-- `StudentProfile` - Comprehensive student data including academic interests, career goals, financial constraints, schedule preferences, and personal factors
-- `CommunityCollege` - College data with programs, costs, facilities, and location
-- `MatchResult` - Scored match between student and college with reasons and recommendations
+**Services** (`/lib/`):
+- `matching-service.ts` - Core matching algorithm that scores colleges based on student profile
 
-**Matching Algorithm** (`/lib/matching-service.ts`):
-- Weighs factors: Financial (25%), Programs (30%), Schedule (20%), Geography (15%), Services (10%)
-- Returns sorted matches with scores, reasons, concerns, and next steps
+**Data Flow**:
+1. Student completes assessment → creates `StudentProfile`
+2. `CollegeMatchingService` processes profile against college data
+3. Returns `MatchResult[]` with compatibility scores
+4. Results displayed across multiple views (list, map, financial, etc.)
 
-**AI Integration**:
-- `/app/api/chat/route.ts` - OpenAI GPT-4o powered counselor API
-- Uses student profile and match data to provide personalized advice
+### API Routes
+- `/api/chat` - Handles AI counselor chat interactions using OpenAI
 
-### UI Framework
-
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **State Management**: React useState for local component state
-- **Components**: Extensive use of Radix UI primitives via shadcn/ui
-- **Path Alias**: `@/*` maps to project root
-
-### Key Features
-
-1. **Student Assessment**: Multi-step form collecting comprehensive profile
-2. **AI Matching**: Algorithmic scoring system for college recommendations  
-3. **Interactive Results**: Tabbed interface with matches, map, finances, applications, and chat
-4. **AI Counselor**: Contextual chat assistant using student data and match results
-5. **Mock Data**: Currently uses `/data/mock-colleges.ts` for demonstration
-
-### Development Notes
-
-- TypeScript throughout with strict configuration
-- Component structure follows Next.js App Router conventions
-- Uses React 19 and Next.js 15
-- All components are client-side (`"use client"`) due to interactive nature
-- Mock data currently drives the matching system - replace with real API when available
+### Type System
+All major types are defined in `/types/index.ts`:
+- `StudentProfile` - Student preferences and information
+- `College` - College data structure
+- `MatchResult` - College with compatibility score
+- `Application` - Application tracking data

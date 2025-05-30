@@ -29,8 +29,13 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
   }, [])
 
   useEffect(() => {
-    // Get user's location
-    if (navigator.geolocation) {
+    // Use address coordinates if available, otherwise try geolocation
+    if (studentProfile.address?.coordinates) {
+      setUserLocation({
+        lat: studentProfile.address.coordinates.lat,
+        lng: studentProfile.address.coordinates.lng,
+      })
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation({
@@ -44,8 +49,11 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
           setUserLocation({ lat: 39.8283, lng: -98.5795 })
         },
       )
+    } else {
+      // Fallback to a default location
+      setUserLocation({ lat: 39.8283, lng: -98.5795 })
     }
-  }, [])
+  }, [studentProfile.address])
 
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
     const R = 3959 // Earth's radius in miles
@@ -149,6 +157,11 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
                 <Popup>
                   <div className="text-center">
                     <strong>Your Location</strong>
+                    {studentProfile.address && (
+                      <div className="text-sm text-gray-600 mt-1">
+                        {studentProfile.address.city}, {studentProfile.address.state}
+                      </div>
+                    )}
                   </div>
                 </Popup>
               </Marker>
