@@ -2,6 +2,13 @@ export interface StudentProfile {
   id: string
   name: string
   email: string
+  address: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+    coordinates?: { lat: number; lng: number }
+  }
   academicInterests: string[]
   careerGoals: string[]
   learningStyle: "visual" | "auditory" | "kinesthetic" | "reading"

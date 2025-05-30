@@ -1,4 +1,5 @@
 import type { StudentProfile, CommunityCollege, MatchResult, Program } from "@/types"
+import { calculateDistance } from "./geocoding-service"
 
 export class CollegeMatchingService {
   private colleges: CommunityCollege[]
@@ -57,8 +58,8 @@ export class CollegeMatchingService {
 
     // Geographic fit (15% weight)
     maxScore += 15
-    // For demo purposes, assume all colleges are within range
-    score += 15
+    const geographicScore = this.calculateGeographicFit(student, college)
+    score += geographicScore * 15
 
     // Services and support (10% weight)
     maxScore += 10
@@ -120,6 +121,45 @@ export class CollegeMatchingService {
     return 0.3
   }
 
+  private calculateGeographicFit(student: StudentProfile, college: CommunityCollege): number {
+    // If student has coordinates, calculate actual distance
+    if (student.address?.coordinates) {
+      const distance = calculateDistance(
+        student.address.coordinates.lat,
+        student.address.coordinates.lng,
+        college.location.coordinates.lat,
+        college.location.coordinates.lng
+      )
+
+      const maxDistance = student.geographicPreferences.maxDistance
+
+      if (distance <= maxDistance) {
+        // Perfect fit - within preferred distance
+        return 1.0
+      } else if (distance <= maxDistance * 1.5) {
+        // Good fit - slightly over preferred distance
+        return 0.7
+      } else if (distance <= maxDistance * 2) {
+        // Moderate fit - significantly over preferred distance
+        return 0.4
+      } else {
+        // Poor fit - far beyond preferred distance
+        return 0.1
+      }
+    }
+
+    // Fallback: check if college is in preferred states
+    if (student.geographicPreferences.preferredStates.length > 0) {
+      if (student.geographicPreferences.preferredStates.includes(college.location.state)) {
+        return 0.8
+      }
+      return 0.3
+    }
+
+    // No geographic preferences specified
+    return 0.5
+  }
+
   private calculateServicesMatch(student: StudentProfile, college: CommunityCollege): number {
     let score = 0
     let maxScore = 0
@@ -164,6 +204,20 @@ export class CollegeMatchingService {
   private generateMatchReasons(student: StudentProfile, college: CommunityCollege): string[] {
     const reasons: string[] = []
 
+    // Geographic reasons
+    if (student.address?.coordinates) {
+      const distance = calculateDistance(
+        student.address.coordinates.lat,
+        student.address.coordinates.lng,
+        college.location.coordinates.lat,
+        college.location.coordinates.lng
+      )
+      
+      if (distance <= student.geographicPreferences.maxDistance) {
+        reasons.push(`Located ${Math.round(distance)} miles from your address`)
+      }
+    }
+
     // Financial reasons
     if (college.costs.inStateTuition <= student.financialConstraints.maxTuition) {
       reasons.push(`Tuition ($${college.costs.inStateTuition.toLocaleString()}) fits within your budget`)
@@ -194,6 +248,20 @@ export class CollegeMatchingService {
 
   private identifyConcerns(student: StudentProfile, college: CommunityCollege): string[] {
     const concerns: string[] = []
+
+    // Geographic concerns
+    if (student.address?.coordinates) {
+      const distance = calculateDistance(
+        student.address.coordinates.lat,
+        student.address.coordinates.lng,
+        college.location.coordinates.lat,
+        college.location.coordinates.lng
+      )
+      
+      if (distance > student.geographicPreferences.maxDistance) {
+        concerns.push(`Located ${Math.round(distance)} miles away (exceeds your ${student.geographicPreferences.maxDistance} mile preference)`)
+      }
+    }
 
     // Financial concerns
     if (college.costs.inStateTuition > student.financialConstraints.maxTuition) {

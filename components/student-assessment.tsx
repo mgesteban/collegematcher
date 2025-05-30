@@ -19,6 +19,12 @@ export default function StudentAssessment({ onComplete }: StudentAssessmentProps
   const [profile, setProfile] = useState<Partial<StudentProfile>>({
     academicInterests: [],
     careerGoals: [],
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+    },
     geographicPreferences: {
       maxDistance: 50,
       preferredStates: [],
@@ -135,6 +141,67 @@ export default function StudentAssessment({ onComplete }: StudentAssessmentProps
                   })
                 }
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Your Address</Label>
+              <Input
+                id="street"
+                value={profile.address?.street || ""}
+                onChange={(e) =>
+                  updateProfile({
+                    address: {
+                      ...profile.address!,
+                      street: e.target.value,
+                    },
+                  })
+                }
+                placeholder="Street address"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  id="city"
+                  value={profile.address?.city || ""}
+                  onChange={(e) =>
+                    updateProfile({
+                      address: {
+                        ...profile.address!,
+                        city: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder="City"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    id="state"
+                    value={profile.address?.state || ""}
+                    onChange={(e) =>
+                      updateProfile({
+                        address: {
+                          ...profile.address!,
+                          state: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="State"
+                    maxLength={2}
+                  />
+                  <Input
+                    id="zipCode"
+                    value={profile.address?.zipCode || ""}
+                    onChange={(e) =>
+                      updateProfile({
+                        address: {
+                          ...profile.address!,
+                          zipCode: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="ZIP code"
+                    maxLength={5}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )

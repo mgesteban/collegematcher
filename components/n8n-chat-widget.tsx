@@ -2,61 +2,57 @@
 
 import { useEffect, useRef } from "react"
 
-const N8N_CHAT_CSS_URL = "https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"
-const N8N_CHAT_SCRIPT_URL = "https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js"
-const N8N_WEBHOOK_URL = "https://wwendidi.app.n8n.cloud/webhook/e0a11ea2-9dd7-496a-8078-1a96f05fc04b/chat"
-
-export default function N8nChatWidget() {
+const N8nChatWidget = () => {
   const scriptLoadedRef = useRef(false)
+  const linkRef = useRef<HTMLLinkElement | null>(null)
+  const scriptRef = useRef<HTMLScriptElement | null>(null)
 
   useEffect(() => {
-    // Prevent script from loading multiple times
-    if (scriptLoadedRef.current) {
+    if (scriptLoadedRef.current || typeof window === "undefined") {
       return
     }
 
-    // 1. Load the CSS
-    const linkElement = document.createElement("link")
-    linkElement.rel = "stylesheet"
-    linkElement.href = N8N_CHAT_CSS_URL
-    document.head.appendChild(linkElement)
+    // Add CSS
+    const link = document.createElement("link")
+    link.href = "https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"
+    link.rel = "stylesheet"
+    document.head.appendChild(link)
+    linkRef.current = link
 
-    // 2. Load and initialize the chat script
-    const scriptElement = document.createElement("script")
-    scriptElement.type = "module"
-    scriptElement.innerHTML = `
+    // Add and execute script
+    const script = document.createElement("script")
+    script.type = "module"
+    script.innerHTML = `
       try {
-        const { createChat } = await import('${N8N_CHAT_SCRIPT_URL}');
-        if (typeof createChat === 'function') {
-          createChat({
-            webhookUrl: '${N8N_WEBHOOK_URL}'
-          });
-          console.log('n8n chat initialized.');
-        } else {
-          console.error('createChat function not found in n8n chat bundle.');
-        }
+        const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
+        createChat({
+          webhookUrl: 'https://wwendidi.app.n8n.cloud/webhook/e0a11ea2-9dd7-496a-8078-1a96f05fc04b/chat'
+        });
       } catch (error) {
-        console.error('Error loading or initializing n8n chat:', error);
+        console.error("Failed to load n8n chat widget:", error);
       }
     `
-    document.body.appendChild(scriptElement)
+    document.body.appendChild(script)
+    scriptRef.current = script
+
     scriptLoadedRef.current = true
 
-    // Cleanup function to remove the elements if the component unmounts
-    // This might not fully remove the chat widget if it modifies the DOM extensively
     return () => {
-      document.head.removeChild(linkElement)
-      document.body.removeChild(scriptElement)
-      // Note: The n8n chat widget might have its own cleanup or might leave elements in the DOM.
-      // You might need to find a way to call a destroy method if the n8n library provides one.
-      const n8nChatElements = document.querySelectorAll('[id^="n8nchat-"]') // Example selector
-      n8nChatElements.forEach((el) => el.remove())
+      // Cleanup: Remove the added elements when the component unmounts
+      if (linkRef.current) {
+        document.head.removeChild(linkRef.current)
+      }
+      if (scriptRef.current) {
+        document.body.removeChild(scriptRef.current)
+      }
+      // Note: The n8n script might inject its own DOM elements that are harder to clean up
+      // without specific knowledge of its internals (e.g., if it creates a div with a specific ID).
+      // For now, we remove the script tag itself.
       scriptLoadedRef.current = false
-      console.log("n8n chat elements cleaned up (attempted).")
     }
-  }, []) // Empty dependency array ensures this runs only once on mount and unmount
+  }, []) // Empty dependency array ensures this runs only once on mount
 
-  // This component doesn't render anything itself,
-  // as the n8n script will likely append its UI to the body.
-  return null
+  return null // This component doesn't render any visible JSX itself
 }
+
+export default N8nChatWidget

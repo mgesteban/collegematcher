@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import type { StudentProfile, MatchResult } from "@/types"
-import { mockColleges } from "@/data/mock-colleges"
+import { californiaColleges } from "@/data/california-colleges"
 import { CollegeMatchingService } from "@/lib/matching-service"
+import { geocodeAddress } from "@/lib/geocoding-service"
 import StudentAssessment from "@/components/student-assessment"
 import MatchResults from "@/components/match-results"
 import ChatInterface from "@/components/chat-interface"
@@ -22,11 +23,26 @@ export default function Home() {
 
   const handleAssessmentComplete = async (profile: StudentProfile) => {
     setIsLoading(true)
-    setStudentProfile(profile)
 
     try {
-      // Initialize matching service with mock data
-      const matchingService = new CollegeMatchingService(mockColleges)
+      // Geocode the student's address to get coordinates
+      if (profile.address) {
+        const coordinates = await geocodeAddress(
+          profile.address.street,
+          profile.address.city,
+          profile.address.state,
+          profile.address.zipCode,
+        )
+
+        if (coordinates) {
+          profile.address.coordinates = coordinates
+        }
+      }
+
+      setStudentProfile(profile)
+
+      // Initialize matching service with California colleges data
+      const matchingService = new CollegeMatchingService(californiaColleges)
 
       // Find matches
       const results = await matchingService.findMatches(profile)
@@ -155,7 +171,7 @@ export default function Home() {
           </TabsContent>
         </Tabs>
 
-        {/* Add the n8n chat widget */}
+        {/* Add the n8n chat widget here */}
         <N8nChatWidget />
       </div>
     </div>
