@@ -1,4 +1,4 @@
-import CollegeList from "@/components/CollegeList"
+import CollegeList from "@/components/college-list"
 import { loadCollegesFromCSV } from "@/data/load-colleges"
 
 export default async function Home() {
