@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import type { StudentProfile, MatchResult } from "@/types"
-import { californiaColleges } from "@/data/california-colleges"
+import { mockColleges } from "@/data/mock-colleges"
 import { CollegeMatchingService } from "@/lib/matching-service"
-import { geocodeAddress } from "@/lib/geocoding-service"
 import StudentAssessment from "@/components/student-assessment"
 import MatchResults from "@/components/match-results"
 import ChatInterface from "@/components/chat-interface"
@@ -14,6 +13,7 @@ import { GraduationCap, Users, MessageCircle, BarChart3 } from "lucide-react"
 import CollegeMap from "@/components/college-map"
 import ApplicationTracker from "@/components/application-tracker"
 import FinancialCalculator from "@/components/financial-calculator"
+import N8nChatWidget from "@/components/n8n-chat-widget"
 
 export default function Home() {
   const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null)
@@ -22,26 +22,11 @@ export default function Home() {
 
   const handleAssessmentComplete = async (profile: StudentProfile) => {
     setIsLoading(true)
+    setStudentProfile(profile)
 
     try {
-      // Geocode the student's address to get coordinates
-      if (profile.address) {
-        const coordinates = await geocodeAddress(
-          profile.address.street,
-          profile.address.city,
-          profile.address.state,
-          profile.address.zipCode
-        )
-        
-        if (coordinates) {
-          profile.address.coordinates = coordinates
-        }
-      }
-
-      setStudentProfile(profile)
-
-      // Initialize matching service with California colleges data
-      const matchingService = new CollegeMatchingService(californiaColleges)
+      // Initialize matching service with mock data
+      const matchingService = new CollegeMatchingService(mockColleges)
 
       // Find matches
       const results = await matchingService.findMatches(profile)
@@ -169,6 +154,9 @@ export default function Home() {
             <ApplicationTracker matches={matches} />
           </TabsContent>
         </Tabs>
+
+        {/* Add the n8n chat widget */}
+        <N8nChatWidget />
       </div>
     </div>
   )
