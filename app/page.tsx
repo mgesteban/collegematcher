@@ -1,5 +1,5 @@
-import CollegeList from "@/components/college-list" // Corrected import path
-import { loadCollegesFromCSV } from "@/data/load-colleges"
+import CollegeList from "@/components/college-list"
+import { loadCollegesFromCSV } from "@/data/load-colleges" // Corrected import path
 
 export default async function Home() {
   const allColleges = await loadCollegesFromCSV()
