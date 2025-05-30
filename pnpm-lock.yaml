@@ -171,9 +171,6 @@ importers:
         specifier: ^3.24.1
         version: 3.24.1
     devDependencies:
-      '@types/leaflet':
-        specifier: ^1.9.18
-        version: 1.9.18
       '@types/node':
         specifier: ^22
         version: 22.0.0
