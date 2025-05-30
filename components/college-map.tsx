@@ -1,10 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { MatchResult, StudentProfile } from "@/types"
 import { MapPin, Navigation, Car, Bus, Bike } from "lucide-react"
+
+// Dynamic import of react-leaflet components to avoid SSR issues
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false })
+const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false })
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false })
+const Circle = dynamic(() => import("react-leaflet").then((mod) => mod.Circle), { ssr: false })
 
 interface CollegeMapProps {
   matches: MatchResult[]
@@ -14,6 +22,11 @@ interface CollegeMapProps {
 export default function CollegeMap({ matches, studentProfile }: CollegeMapProps) {
   const [selectedCollege, setSelectedCollege] = useState<string | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
     // Get user's location
@@ -80,7 +93,7 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
     }
   }
 
-  if (!userLocation) {
+  if (!userLocation || !isClient) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-8">
@@ -93,6 +106,22 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
     )
   }
 
+  // Import Leaflet CSS
+  if (typeof window !== 'undefined') {
+    require('leaflet/dist/leaflet.css')
+  }
+
+  // Fix for default marker icon in react-leaflet
+  if (typeof window !== 'undefined') {
+    const L = require('leaflet')
+    delete (L.Icon.Default.prototype as any)._getIconUrl
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    })
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -103,41 +132,69 @@ export default function CollegeMap({ matches, studentProfile }: CollegeMapProps)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Simple map representation */}
-          <div className="bg-gray-100 rounded-lg p-6 mb-4 relative min-h-[400px]">
-            <div className="absolute top-4 left-4 bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">
-              📍 Your Location
-            </div>
-
-            {/* College markers */}
-            {matches.slice(0, 5).map((match, index) => {
-              const distance = calculateDistance(
-                userLocation.lat,
-                userLocation.lng,
-                match.college.location.coordinates.lat,
-                match.college.location.coordinates.lng,
-              )
-
-              return (
-                <div
-                  key={match.college.id}
-                  className={`absolute bg-white border-2 rounded-lg p-2 cursor-pointer shadow-md transition-all ${
-                    selectedCollege === match.college.id ? "border-blue-500 scale-110" : "border-gray-300"
-                  }`}
-                  style={{
-                    left: `${20 + index * 15}%`,
-                    top: `${30 + index * 10}%`,
-                  }}
-                  onClick={() => setSelectedCollege(match.college.id)}
-                >
-                  <div className="text-xs font-medium">{match.college.name}</div>
-                  <div className="text-xs text-gray-600">{Math.round(distance)} miles</div>
-                  <Badge variant={match.matchScore >= 80 ? "default" : "secondary"} className="text-xs">
-                    {match.matchScore}%
-                  </Badge>
-                </div>
-              )
-            })}
+          {/* Interactive Leaflet Map */}
+          <div className="rounded-lg overflow-hidden mb-4" style={{ height: "500px" }}>
+            <MapContainer
+              center={[userLocation.lat, userLocation.lng]}
+              zoom={10}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
+              {/* User location marker */}
+              <Marker position={[userLocation.lat, userLocation.lng]}>
+                <Popup>
+                  <div className="text-center">
+                    <strong>Your Location</strong>
+                  </div>
+                </Popup>
+              </Marker>
+              
+              {/* Preferred distance circle */}
+              <Circle
+                center={[userLocation.lat, userLocation.lng]}
+                radius={studentProfile.geographicPreferences.maxDistance * 1609.34} // Convert miles to meters
+                pathOptions={{ color: 'blue', fillColor: '#30f', fillOpacity: 0.1 }}
+              />
+              
+              {/* College markers */}
+              {matches.map((match) => {
+                const distance = calculateDistance(
+                  userLocation.lat,
+                  userLocation.lng,
+                  match.college.location.coordinates.lat,
+                  match.college.location.coordinates.lng,
+                )
+                
+                return (
+                  <Marker
+                    key={match.college.id}
+                    position={[match.college.location.coordinates.lat, match.college.location.coordinates.lng]}
+                    eventHandlers={{
+                      click: () => setSelectedCollege(match.college.id),
+                    }}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <h4 className="font-medium">{match.college.name}</h4>
+                        <p className="text-sm text-gray-600">
+                          {match.college.location.city}, {match.college.location.state}
+                        </p>
+                        <div className="mt-2 space-y-1">
+                          <Badge variant={match.matchScore >= 80 ? "default" : "secondary"}>
+                            Match: {match.matchScore}%
+                          </Badge>
+                          <p className="text-xs text-gray-600">{Math.round(distance)} miles away</p>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              })}
+            </MapContainer>
           </div>
 
           {/* Distance and travel information */}
