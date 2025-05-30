@@ -1,5 +1,5 @@
 import CollegeList from "@/components/college-list"
-import { loadCollegesFromCSV } from "@/data/load-colleges" // Ensure this path is correct
+import { loadCollegesFromCSV } from "@/data/load-colleges" // This is the critical import
 
 export default async function Home() {
   const allColleges = await loadCollegesFromCSV()
@@ -19,8 +19,9 @@ export default async function Home() {
             <CollegeList colleges={allColleges} />
           ) : (
             <div className="text-center py-10">
-              <p className="text-xl text-gray-700">Loading college data or no colleges found.</p>
-              {/* You could add more specific error handling here if loadCollegesFromCSV could return null/error objects */}
+              <p className="text-xl text-gray-700">
+                {allColleges ? "No colleges found." : "Loading college data or an error occurred."}
+              </p>
             </div>
           )}
         </section>
