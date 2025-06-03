@@ -1,0 +1,223 @@
+# Community College Matcher - Project Intelligence
+
+## Critical Implementation Paths
+
+### 1. Matching Algorithm Flow
+**Pattern**: Always follow the weighted scoring approach
+- Financial fit (25%) - Primary constraint for most users
+- Program alignment (30%) - Core academic/career matching
+- Schedule compatibility (20%) - Practical lifestyle fit
+- Geographic fit (15%) - Distance and transportation
+- Services match (10%) - Support services alignment
+
+**Key Insight**: Users value practical constraints (financial, schedule, location) as much as academic fit. The algorithm reflects real-world decision-making priorities.
+
+### 2. State Management Strategy
+**Pattern**: Keep it simple with intentional prop drilling
+- Main page holds all application state (studentProfile, matches, isLoading)
+- Pass data down through props rather than global state
+- Each component manages its own local UI state
+
+**Why This Works**: Application complexity doesn't justify Redux/Zustand overhead. Current approach is maintainable and performant.
+
+### 3. Component Composition Pattern
+**Pattern**: Base UI + Feature Components + Page Orchestration
+```
+shadcn/ui components (base) 
+→ Feature components (StudentAssessment, MatchResults, etc.)
+→ Page component (orchestration and state)
+```
+
+**Key Insight**: This three-layer approach provides flexibility without over-engineering. Easy to modify individual features without affecting others.
+
+## User Preferences & Workflow
+
+### 1. Progressive Disclosure Preference
+**User Behavior**: Users prefer gradual information revelation
+- Start with simple assessment
+- Show loading state during processing
+- Present results in digestible tabs
+- Provide AI counselor for deeper questions
+
+**Implementation**: Never overwhelm users with all information at once. Use tabs, progressive forms, and contextual help.
+
+### 2. Visual Learning Priority
+**User Behavior**: Users heavily rely on visual tools for decision-making
+- Map view is frequently accessed
+- Financial charts aid understanding
+- Match scores provide quick comparison
+- Visual progress indicators reduce anxiety
+
+**Implementation**: Always provide visual alternatives to text-heavy information. Maps, charts, and progress indicators are essential.
+
+### 3. Context-Aware Assistance
+**User Behavior**: Users want help that understands their specific situation
+- AI counselor must know student profile and matches
+- Responses should reference specific colleges and programs
+- Advice should be actionable and personalized
+
+**Implementation**: Always pass full context to AI interactions. Generic advice is less valuable than personalized guidance.
+
+## Project-Specific Patterns
+
+### 1. Mock Data Strategy
+**Pattern**: Structure mock data to mirror real API responses
+- Use realistic college names and locations
+- Include comprehensive program information
+- Maintain data consistency across components
+
+**Evolution**: Mock data structure has proven robust for real API integration. Keep the same interfaces when switching to live data.
+
+### 2. Geocoding Approach
+**Pattern**: Custom service with fallback strategies
+- Primary: Address string to coordinates conversion
+- Fallback: Default coordinates for failed geocoding
+- Distance calculations using Haversine formula
+
+**Key Learning**: Geocoding can fail, so always have fallbacks. Users' addresses may be incomplete or incorrectly formatted.
+
+### 3. AI Integration Pattern
+**Pattern**: Context-rich prompts with structured data
+- Include student profile in every request
+- Provide top 3 matches with detailed information
+- Maintain conversation history for continuity
+- Use system prompts to define counselor personality
+
+**Success Factor**: Rich context makes AI responses significantly more valuable. Don't skimp on context data.
+
+## Known Challenges & Solutions
+
+### 1. Performance with Large Datasets
+**Challenge**: Matching algorithm performance with hundreds of colleges
+**Current Solution**: Efficient algorithm with early exits
+**Future Solution**: Consider web workers for heavy computations
+
+### 2. Mobile Map Performance
+**Challenge**: Leaflet maps can be slow on older mobile devices
+**Current Solution**: Responsive design with simplified mobile view
+**Future Solution**: Lazy loading and progressive enhancement
+
+### 3. Form Completion Rates
+**Challenge**: Long assessment form may cause abandonment
+**Current Solution**: Progressive disclosure and clear progress indicators
+**Optimization**: Consider saving partial progress and allowing resume
+
+## Tool Usage Patterns
+
+### 1. Development Workflow
+**Preferred Tools**:
+- VS Code with TypeScript and Tailwind extensions
+- pnpm for package management (faster than npm)
+- Chrome DevTools with React Developer Tools
+- Console logging for debugging (structured logging)
+
+**Key Pattern**: Always use TypeScript strict mode. Type errors catch issues early and improve developer experience.
+
+### 2. Component Development
+**Pattern**: Start with shadcn/ui base, customize as needed
+- Use Tailwind utilities for styling
+- Implement responsive design from the start
+- Add proper TypeScript interfaces
+- Include error states and loading states
+
+**Key Insight**: shadcn/ui components are highly customizable. Don't fight the design system - extend it.
+
+### 3. API Integration
+**Pattern**: Service layer abstraction
+- Create service classes for external APIs
+- Handle errors gracefully with fallbacks
+- Use TypeScript interfaces for API responses
+- Implement caching where appropriate
+
+**Success Factor**: Service layer makes testing easier and provides clean separation of concerns.
+
+## Evolution of Project Decisions
+
+### 1. State Management Evolution
+**Initial**: Considered Redux for state management
+**Current**: Simple React state with prop drilling
+**Reasoning**: Application complexity doesn't justify Redux overhead
+**Future**: May revisit for user accounts and persistent state
+
+### 2. Styling Evolution
+**Initial**: Considered styled-components or emotion
+**Current**: Tailwind CSS with shadcn/ui
+**Reasoning**: Utility-first approach is faster and more maintainable
+**Success**: Excellent developer experience and consistent design
+
+### 3. AI Integration Evolution
+**Initial**: Considered multiple AI providers
+**Current**: OpenAI GPT-4o with Vercel AI SDK
+**Reasoning**: Best TypeScript support and streaming capabilities
+**Success**: Excellent developer experience and user experience
+
+## Critical Success Factors
+
+### 1. User-Centric Design
+**Key Insight**: Community college students have unique constraints
+- Financial limitations are primary concern
+- Work and family obligations affect scheduling
+- Geographic constraints due to transportation
+- Need for practical, career-focused guidance
+
+**Implementation**: Algorithm and UX must reflect these real-world constraints.
+
+### 2. Transparency in Matching
+**Key Insight**: Users want to understand why colleges are recommended
+- Provide clear match scores and explanations
+- Identify potential concerns upfront
+- Explain the reasoning behind recommendations
+- Allow users to see the algorithm weights
+
+**Implementation**: Never use "black box" recommendations. Always explain the "why."
+
+### 3. Performance and Accessibility
+**Key Insight**: Target audience may have older devices and varying technical skills
+- Optimize for mobile performance
+- Ensure accessibility compliance
+- Provide clear navigation and help
+- Handle errors gracefully
+
+**Implementation**: Test on older devices and with accessibility tools.
+
+## Future Considerations
+
+### 1. Real Data Integration
+**Preparation**: Current mock data structure is API-ready
+**Challenges**: Data quality, consistency, and freshness
+**Strategy**: Implement robust validation and caching
+
+### 2. User Accounts
+**When**: After real data integration is complete
+**Benefits**: Saved searches, application tracking, personalized recommendations
+**Considerations**: Privacy, data security, and user experience
+
+### 3. Machine Learning Enhancement
+**Opportunity**: Improve matching algorithm with user feedback
+**Implementation**: Collect user satisfaction data and outcomes
+**Goal**: Continuously improve match quality and user satisfaction
+
+## Development Best Practices
+
+### 1. Code Organization
+**Pattern**: Feature-based organization with clear separation
+- Components grouped by feature
+- Services in dedicated lib folder
+- Types centralized and comprehensive
+- Clear naming conventions
+
+### 2. Error Handling
+**Pattern**: Graceful degradation with user-friendly messages
+- Always provide fallback states
+- Log errors for debugging but don't expose to users
+- Use error boundaries for component-level errors
+- Provide clear recovery paths
+
+### 3. Performance Monitoring
+**Pattern**: Measure what matters to users
+- Page load times and Core Web Vitals
+- User engagement metrics
+- Error rates and types
+- Feature adoption rates
+
+This .clinerules file captures the accumulated wisdom and patterns discovered during development. It should be updated as new insights are gained and the project evolves.
