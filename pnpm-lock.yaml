@@ -95,9 +95,6 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.6
         version: 1.1.6(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@types/leaflet':
-        specifier: ^1.9.18
-        version: 1.9.18
       ai:
         specifier: latest
         version: 4.3.16(react@19.0.0)(zod@3.24.1)
@@ -171,6 +168,9 @@ importers:
         specifier: ^3.24.1
         version: 3.24.1
     devDependencies:
+      '@types/leaflet':
+        specifier: ^1.9.18
+        version: 1.9.18
       '@types/node':
         specifier: ^22
         version: 22.0.0
