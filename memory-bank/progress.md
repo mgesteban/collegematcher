@@ -348,6 +348,31 @@ export default {
 - [ ] Domain configuration
 - [ ] SSL certificate setup
 
+### 🚨 CRITICAL DEPLOYMENT WORKFLOW 🚨
+
+**IMPORTANT**: Every time we update code on GitHub and deploy to Vercel, follow this process:
+
+1. **After Git Push**: Verify changes are pushed to GitHub repository
+2. **Check Vercel Dashboard**: Go to Vercel app dashboard
+3. **Verify Latest Commit**: Ensure the latest commit number matches your GitHub push
+4. **Manual Promotion Required**: 
+   - Click the **options menu** (⋯) in the upper right navigation of Vercel app
+   - Select **"PROMOTE TO PRODUCTION"**
+   - This step is MANDATORY - deployments don't automatically go to production
+
+**Why This Matters**:
+- Vercel creates preview deployments by default
+- Production deployment requires manual promotion
+- Users won't see changes until promoted to production
+- Always verify the commit hash matches before promoting
+
+**Deployment Verification Steps**:
+1. ✅ Code pushed to GitHub
+2. ✅ Vercel build completes successfully
+3. ✅ Latest commit hash verified
+4. ✅ **PROMOTE TO PRODUCTION** clicked
+5. ✅ Production URL updated and tested
+
 ## Success Metrics & KPIs 📈
 
 ### User Engagement (Targets)
