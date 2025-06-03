@@ -35,6 +35,11 @@ export default function Home() {
         
         if (coordinates) {
           profile.address.coordinates = coordinates
+          console.log('Address geocoded successfully:', coordinates)
+        } else {
+          console.warn('Failed to geocode address, using fallback coordinates')
+          // Use a default location if geocoding fails
+          profile.address.coordinates = { lat: 39.8283, lng: -98.5795 } // Center of US
         }
       }
 

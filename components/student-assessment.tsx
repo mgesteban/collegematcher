@@ -88,7 +88,12 @@ export default function StudentAssessment({ onComplete }: StudentAssessmentProps
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      onComplete(profile as StudentProfile)
+      // Add ID to profile before completing
+      const completeProfile = {
+        ...profile,
+        id: Date.now().toString(), // Simple ID generation
+      } as StudentProfile
+      onComplete(completeProfile)
     }
   }
 

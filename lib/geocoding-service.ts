@@ -5,16 +5,15 @@ export async function geocodeAddress(
   zipCode: string
 ): Promise<{ lat: number; lng: number } | null> {
   try {
+    console.log('Geocoding address:', { street, city, state, zipCode })
+    
     // Using Nominatim OpenStreetMap geocoding service (free, no API key required)
     const address = `${street}, ${city}, ${state} ${zipCode}, USA`
     const encodedAddress = encodeURIComponent(address)
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'CommunityCollegeMatcher/1.0'
-      }
-    })
+    console.log('Geocoding URL:', url)
+    const response = await fetch(url)
 
     if (!response.ok) {
       console.error('Geocoding request failed:', response.statusText)
@@ -22,24 +21,23 @@ export async function geocodeAddress(
     }
 
     const data = await response.json()
+    console.log('Geocoding response:', data)
 
     if (data && data.length > 0) {
       const result = data[0]
-      return {
+      const coordinates = {
         lat: parseFloat(result.lat),
         lng: parseFloat(result.lon)
       }
+      console.log('Coordinates found:', coordinates)
+      return coordinates
     }
 
     // Fallback: try with just city, state, and zip
     const fallbackAddress = `${city}, ${state} ${zipCode}, USA`
     const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackAddress)}&limit=1`
     
-    const fallbackResponse = await fetch(fallbackUrl, {
-      headers: {
-        'User-Agent': 'CommunityCollegeMatcher/1.0'
-      }
-    })
+    const fallbackResponse = await fetch(fallbackUrl)
 
     if (fallbackResponse.ok) {
       const fallbackData = await fallbackResponse.json()

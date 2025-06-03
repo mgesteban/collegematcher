@@ -63,3 +63,4 @@ All major types are defined in `/types/index.ts`:
 - `College` - College data structure
 - `MatchResult` - College with compatibility score
 - `Application` - Application tracking data
+
